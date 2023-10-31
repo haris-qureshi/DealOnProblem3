@@ -10,19 +10,15 @@ namespace ConsoleApp1
 {
     public class trainRoutes
     {
-        public static List<ConversionNode> Map = new List<ConversionNode>();
+        //initializing Global variables
+        public static List<ConversionNode> Map = new List<ConversionNode>(); 
         public static List<Node> Tree = new List<Node>();
-
         public static int GlobalSuccesfulRoutesCounter = 0; //global counter to keep track of routes for last option
 
         static void Main(string[] args)
         {
 
-            //string[] input = { "AB5", "BC4", "CD8", "DC8", "DE6", "AD5", "CE2", "EB3", "AE7" };
-            //loading input into map
-            //LoadMap(input);
-
-            //loading input into map
+            //Getting user input of the map
             string input;
             while (true)
             {
@@ -63,11 +59,9 @@ namespace ConsoleApp1
             //creates the tree structure
             Generate_Tree();
 
-            string mystring = null;
-            bool run = true;
-
-            string route = "";
-            string source, destination = "";
+            string userOptions = null; //options the user selects
+            bool run = true;//bool for running if user enters any option besides what is provided program will quit
+            string source, destination = "";//starting city and destination city user enters
 
 
             while (run) 
@@ -78,12 +72,16 @@ namespace ConsoleApp1
                 Console.WriteLine("3) number trips from x to y with EXACTLY x stops");
                 Console.WriteLine("4) Length of the shortest route from X to Y in distance");
                 Console.WriteLine("5) Number of different routes from X to Y with CERTAIN distance");
+                Console.WriteLine("To Exit enter any key");
                 Console.Write("Enter option : ");
-                mystring = Console.ReadLine();
+                userOptions = Console.ReadLine();
                 
-                switch (mystring) 
+                switch (userOptions) 
                 {
                     case "1":
+                        string route = "";
+
+                        //gathering user input
                         Console.WriteLine("Enter Route");
                         route = Console.ReadLine().ToUpper();
 
@@ -91,6 +89,7 @@ namespace ConsoleApp1
                         Console.WriteLine(Distance_to_Route(route));
 
                         break;
+
                     case "2":
                         int maxNumberOfStops = 0;
 
@@ -102,14 +101,16 @@ namespace ConsoleApp1
                         Console.Write("Enter MAXIMUM number of stops: ");
                         maxNumberOfStops = int.Parse(Console.ReadLine());
 
+                        //calculating all possible routes from starting to destination within the user entered max number of stops
                         var resultsOfMaxNumberOfStops = Max_number_of_Stops(source[0], destination[0],maxNumberOfStops,0,0);
                         Console.WriteLine(resultsOfMaxNumberOfStops.ToString());
 
                         break;
+
                     case "3":
                         int ExactNumberOfStops = 0;
 
-                        //taking in input
+                        //gathering user input
                         Console.Write("Enter starting city: ");
                         source = Console.ReadLine().ToUpper();
                         Console.Write("Enter destination city: ");
@@ -117,22 +118,29 @@ namespace ConsoleApp1
                         Console.Write("Enter EXACT number of stops: ");
                         ExactNumberOfStops = int.Parse(Console.ReadLine());
 
+                        //calculating all possible routes from starting to destination within the user entered Exact number of stops
                         var resultofExactNumberOfSteps = Exact_number_of_Stops(source[0], destination[0], ExactNumberOfStops,0,new List<string>());
                         int temp = resultofExactNumberOfSteps.Item1.Count();
                         Console.WriteLine(temp);
                         
                         break;
+
                     case "4":
                         
                         Console.Write("Enter starting city: ");
                         source = Console.ReadLine().ToUpper();
                         Console.Write("Enter destination city: ");
                         destination = Console.ReadLine().ToUpper();
+
+                        //calculating Shortest route from source to destination given by user
                         Console.WriteLine(Shortest_Path(source[0], destination[0],0));
                         
                         break;
+
                     case "5":
                         GlobalSuccesfulRoutesCounter = 0; // reset global counter before every use
+                        
+                        //gathering user input
                         int MaxDistance = 0;
                         Console.Write("Enter starting city: ");
                         source = Console.ReadLine().ToUpper();
@@ -140,10 +148,14 @@ namespace ConsoleApp1
                         destination = Console.ReadLine().ToUpper();
                         Console.Write("Enter MAX Distance: ");
                         MaxDistance = int.Parse(Console.ReadLine());
+                        
+                        //calulating all possible paths within the Max distance given by the user
                         Different_Paths(source[0], destination[0], 0, MaxDistance);
                         Console.WriteLine(GlobalSuccesfulRoutesCounter);
 
                         break;
+
+
                     default:
                         run = false;
                         break;
@@ -154,7 +166,8 @@ namespace ConsoleApp1
         }
 
 
-        // this function is used to create the tree
+        #region Tree Creation
+        // this function is used to create the tree structure
         public static void Generate_Tree() 
         {
             foreach(var city in Map) 
@@ -174,23 +187,9 @@ namespace ConsoleApp1
                 }
             }
         }
+        #endregion
 
-
-        public static void LoadMap(string[] input) 
-        {
-            //load input into map
-            foreach (string city in input)
-            {
-                ConversionNode temp = new ConversionNode();
-                temp.source = city[0];
-                temp.destination = city[1];
-                temp.distance = city[2] - 48;
-
-                Map.Add(temp);
-            }
-        }
-        
-        //Gets the index of the city in the tree
+        #region Gets the index of the city in the tree
         public static int TreeContains(char city) 
         {
             for (int i = 0; i < Tree.Count; i++) 
@@ -200,6 +199,9 @@ namespace ConsoleApp1
             }
             return -1;
         }
+        #endregion
+
+        #region Distance to Route
         //pretty straight forward just follow the route and add the distances
         //send the current city and next city on the route
         public static string Distance_to_Route(string mystring = null) 
@@ -228,7 +230,9 @@ namespace ConsoleApp1
             }
             return "unexpected error";
         }
-        //traverse through the map and get the distance return -1 if source is not in map and -2 if no possible routes to next city
+        #endregion
+
+        #region traverse through the map and get the distance return -1 if source is not in map and -2 if no possible routes to next city
         public static int Map_Traversal(char source, char destination) 
         {
             int index = TreeContains(source);
@@ -245,7 +249,9 @@ namespace ConsoleApp1
 
             return -2;
         }
+        #endregion
 
+        #region Calculate the possible routes with a Max distance
         /// <summary>
         /// recursively go though the map you find the destination then return the route and return based conditions set
         /// </summary>
@@ -274,9 +280,10 @@ namespace ConsoleApp1
             }
             return SuccessfulRoutes;
         }
+#endregion
 
-
-        //recursivly go though tree until destination is found exactly at the number of stops
+        #region Calculate the number routes within Exact number of stops
+        //recursivly go though tree until destination is found at the exact number of stops
         public static (List<string>,int) Exact_number_of_Stops(char currentCity, char destination, int exactNumberOfStops, int currentNumberOfStops, List<string> SuccessfulRoutes)
         {
             //if you arrived at your destination and the exact number of stops pop out
@@ -308,11 +315,12 @@ namespace ConsoleApp1
             }
             return result;
         }
+#endregion
 
-
+        #region Calculating the Shortest Path
         //this is just UCS uniform cost search basically just have a sorted destination list by distance of course and go, you can optimize this by having a global fringe and check that before you pick your city
         //but i did not realize that until 4:20AM and I just wanted to finish this
-         public static int Shortest_Path(char currentCity, char destination, int currentdistance,int firstTime = 0)
+        public static int Shortest_Path(char currentCity, char destination, int currentdistance,int firstTime = 0)
         {
             //if you arrived at your destination and pop out
             if (currentCity.Equals(destination) && firstTime != 0)
@@ -337,8 +345,9 @@ namespace ConsoleApp1
             }
             return result;
         }
+        #endregion
 
-
+        #region Gathering all Unique Paths within certain Distance from starting city to ending city
         //basically the shortest path except with the sorting and the only condition is to reach the max distance
         public static int Different_Paths(char currentCity, char destination, int currentdistance, int maxDistance, int firstTime = 0)
         {
@@ -368,15 +377,32 @@ namespace ConsoleApp1
             }
             return result;
         }
+        #endregion
+
+        #region Functions made primarly for testing
 
         public static void clearGlobalRoutesCounter() { GlobalSuccesfulRoutesCounter = 0; }//made only for the unit test this is how come i wanted to avoid using global variables but simply fix
 
+        //Creating a map from a String array
+        public static void LoadMap(string[] input)
+        {
+            //load input into map
+            foreach (string city in input)
+            {
+                ConversionNode temp = new ConversionNode();
+                temp.source = city[0];
+                temp.destination = city[1];
+                temp.distance = city[2] - 48;
+
+                Map.Add(temp);
+            }
+        }
+        #endregion
+
     }
 
-
-
-
-    //node to load in all values
+    #region dataTypes to used to create Map and Tree Structure
+    //node to load in all values into the Map
     public class ConversionNode
     {
         public char source;
@@ -384,12 +410,12 @@ namespace ConsoleApp1
         public int distance = 0;
     }
 
-    //the node that the we construct the tree with
+    //the node that the we construct the Tree with
     public class Node 
     {
         public char source;
         public List<(char, int)> destination = new List<(char, int)>();
         
     }
-
+    #endregion
 }
